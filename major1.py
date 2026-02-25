@@ -19,7 +19,7 @@ def load_model():
 model = load_model()
 
 # ---------------- SIDEBAR ----------------
-st.sidebar.title("🔐 Cyber Security System")
+st.sidebar.title(" Cyber Security System")
 menu = st.sidebar.radio(
     "Navigation",
     ["Home", "Manual Prediction", "Upload Dataset", "Analytics"]
@@ -75,9 +75,9 @@ elif menu == "Manual Prediction":
         st.markdown("---")
 
         if prediction[0] == 0:
-            st.success("✅ Normal Traffic")
+            st.success(" Normal Traffic")
         else:
-            st.error("🚨 Malicious Activity Detected")
+            st.error(" Malicious Activity Detected")
 
         st.info(f"Confidence: {round(np.max(probability)*100,2)}%")
 
@@ -125,5 +125,6 @@ elif menu == "Analytics":
         ax.set_xlabel("Traffic Type")
         ax.set_ylabel("Count")
         ax.set_title("Attack vs Normal Traffic Distribution")
+
 
         st.pyplot(fig)
