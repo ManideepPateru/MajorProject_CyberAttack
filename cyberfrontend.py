@@ -3,7 +3,6 @@ import joblib
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import base64
 import pandas as pd
 import seaborn as sns
 import io
@@ -14,9 +13,6 @@ from groq import Groq
 # HELPERS
 # ─────────────────────────────────────────────
 
-def get_base64(bin_file):
-    with open(bin_file, "rb") as f:
-        return base64.b64encode(f.read()).decode()
 
 @st.cache_resource
 def load_model():
@@ -127,83 +123,173 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* ── Fonts ── */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Exo 2', sans-serif;
+    font-family: 'DM Sans', sans-serif !important;
 }
 
-/* ── Dark background ── */
+/* ── Dark cyber background with grid ── */
 .stApp {
-    background: linear-gradient(135deg, #0a0e1a 0%, #0d1b2a 50%, #0a1628 100%);
-    color: #e0e6f0;
+    background-color: #020817 !important;
+    background-image:
+        linear-gradient(rgba(0,120,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,120,255,0.04) 1px, transparent 1px) !important;
+    background-size: 40px 40px !important;
+    color: #e2e8f0 !important;
+}
+
+/* ── Main content block ── */
+.main .block-container {
+    background: transparent !important;
+    padding-top: 2rem !important;
+    max-width: 100% !important;
+    color: #e2e8f0 !important;
+}
+
+section[data-testid="stMain"] {
+    background: transparent !important;
 }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d1b2a 0%, #0a1220 100%) !important;
-    border-right: 1px solid #1e3a5f;
+    background: linear-gradient(180deg, #020c1e 0%, #010a18 100%) !important;
+    border-right: 1px solid rgba(0,120,255,0.15) !important;
 }
 [data-testid="stSidebar"] * { color: #cdd9e5 !important; }
 [data-testid="stSidebar"] div[role="radiogroup"] > label {
-    padding: 10px 14px !important;
-    margin: 3px 0 !important;
+    padding: 9px 12px !important;
+    margin: 2px 0 !important;
     border-radius: 6px !important;
     cursor: pointer !important;
-    font-size: 15px !important;
-    transition: background 0.2s;
+    font-size: 14px !important;
+    border: 1px solid transparent !important;
+    transition: all 0.15s !important;
 }
 [data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
-    background: rgba(56, 139, 253, 0.15) !important;
+    background: rgba(0,120,255,0.08) !important;
+    color: #4da6ff !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] [aria-checked="true"] {
+    background: rgba(0,120,255,0.12) !important;
+    border-color: rgba(0,120,255,0.25) !important;
+    color: #4da6ff !important;
 }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(56,139,253,0.25);
-    border-radius: 10px;
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 10px !important;
     padding: 16px !important;
 }
-[data-testid="stMetricLabel"] { color: #8da4bf !important; font-size: 13px !important; }
-[data-testid="stMetricValue"] { color: #e0e6f0 !important; font-size: 28px !important; font-weight: 700 !important; }
+[data-testid="stMetricLabel"] { color: rgba(255,255,255,0.35) !important; font-size: 12px !important; }
+[data-testid="stMetricValue"] { color: #4da6ff !important; font-size: 26px !important; font-weight: 700 !important; font-family: 'Orbitron', monospace !important; }
 
 /* ── Inputs ── */
-input[type="number"] {
-    background: #0d1b2a !important;
-    color: #e0e6f0 !important;
-    border: 1px solid #1e3a5f !important;
+input[type="number"], input[type="text"], input[type="password"] {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid rgba(0,120,255,0.3) !important;
     border-radius: 6px !important;
 }
-
-/* ── Predict button ── */
-div.stButton > button {
-    background: linear-gradient(90deg, #1565c0, #0288d1);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 30px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    width: 100%;
+input[type="number"]:focus, input[type="text"]:focus {
+    border-color: rgba(0,120,255,0.7) !important;
+    outline: none !important;
 }
-div.stButton > button:hover { opacity: 0.88; transform: translateY(-1px); }
-div.stButton > button:active { transform: translateY(0); }
+input[type="number"]::placeholder,
+input[type="text"]::placeholder {
+    color: #4da6ff !important;
+    opacity: 1 !important;
+}
+/* Number input spinner arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.5;
+}
 
-/* ── Section headers ── */
-h1, h2, h3 { color: #e0e6f0 !important; }
-h1 { font-size: 2rem !important; font-weight: 700 !important; letter-spacing: -0.5px; }
+/* ── All text visible ── */
+p, span, label, div { color: #e2e8f0; }
+
+/* ── Buttons ── */
+div.stButton > button {
+    background: linear-gradient(90deg, rgba(0,100,255,0.2), rgba(0,60,180,0.2)) !important;
+    color: #4da6ff !important;
+    border: 1px solid rgba(0,120,255,0.4) !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    cursor: pointer !important;
+    transition: all 0.15s !important;
+    width: 100% !important;
+}
+div.stButton > button:hover {
+    background: linear-gradient(90deg, rgba(0,100,255,0.35), rgba(0,60,180,0.35)) !important;
+    border-color: rgba(0,120,255,0.6) !important;
+    transform: translateY(-1px) !important;
+}
+div.stButton > button:active { transform: translateY(0) !important; }
+
+/* ── Page titles ── */
+h1 {
+    font-family: 'Orbitron', monospace !important;
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    letter-spacing: 0.5px !important;
+}
+h2, h3 { color: #e2e8f0 !important; font-weight: 500 !important; }
 
 /* ── Dividers ── */
-hr { border-color: #1e3a5f !important; }
+hr { border-color: rgba(0,120,255,0.15) !important; }
 
 /* ── Tables ── */
-[data-testid="stDataFrame"] { border: 1px solid #1e3a5f; border-radius: 8px; }
+[data-testid="stDataFrame"] {
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 8px !important;
+}
 
-/* ── Warning / info ── */
+/* ── Alerts ── */
 [data-testid="stAlert"] { border-radius: 8px !important; }
+
+/* ── Expander ── */
+[data-testid="stExpander"] {
+    background: rgba(255,255,255,0.02) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 8px !important;
+}
+
+/* ── Download button ── */
+[data-testid="stDownloadButton"] > button {
+    background: rgba(0,60,120,0.2) !important;
+    color: #60a5fa !important;
+    border: 1px solid rgba(0,120,255,0.3) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    letter-spacing: 0 !important;
+}
+
+/* ── File uploader ── */
+[data-testid="stFileUploader"] {
+    background: rgba(255,255,255,0.02) !important;
+    border: 2px dashed rgba(0,120,255,0.25) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+}
+
+/* ── Number input label ── */
+[data-testid="stNumberInput"] label {
+    color: rgba(255,255,255,0.5) !important;
+    font-size: 13px !important;
+}
+
+/* ── Caption ── */
+[data-testid="stCaptionContainer"] p {
+    color: rgba(255,255,255,0.35) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -223,10 +309,15 @@ except Exception as e:
 # ─────────────────────────────────────────────
 
 st.sidebar.markdown("""
-<div style='text-align:center; padding: 10px 0 20px 0;'>
-  <div style='font-size:42px;'>🛡️</div>
-  <div style='font-family:Share Tech Mono; font-size:18px; color:#58a6ff; font-weight:700;'>CyberShield AI</div>
-  <div style='font-size:11px; color:#6e8299; margin-top:2px;'>Intrusion Detection System</div>
+<div style='text-align:center; padding: 20px 16px 16px;
+     border-bottom: 1px solid rgba(0,120,255,0.12);'>
+  <div style='width:40px; height:40px; background:linear-gradient(135deg,#1a7fff,#0044cc);
+       border-radius:10px; display:flex; align-items:center; justify-content:center;
+       font-size:20px; margin:0 auto 10px;'>🛡️</div>
+  <div style='font-family:Orbitron,monospace; font-size:12px; font-weight:700;
+       color:#4da6ff; letter-spacing:2px;'>CYBERSHIELD</div>
+  <div style='font-size:10px; color:rgba(255,255,255,0.3); margin-top:3px;'>
+       Intrusion Detection System</div>
 </div>
 """, unsafe_allow_html=True)
 st.sidebar.markdown("---")
@@ -266,9 +357,11 @@ if "prediction_log" not in st.session_state:
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
-<div style='text-align:center; padding: 4px 0 8px 0;'>
-  <span style='font-size:20px;'>🤖</span>
-  <span style='font-family:Share Tech Mono; font-size:14px; color:#58a6ff; font-weight:700; margin-left:6px;'>CyberShield Assistant</span>
+<div style='background:rgba(0,100,255,0.08); border:1px solid rgba(0,120,255,0.2);
+     border-radius:10px; padding:10px 12px; margin:0 0 8px 0;'>
+  <div style='font-family:Orbitron,monospace; font-size:10px; font-weight:700;
+       color:#4da6ff; letter-spacing:1.5px; margin-bottom:2px;'>🛡️ THREATSENSE AI</div>
+  <div style='font-size:10px; color:rgba(255,255,255,0.3);'>Cyber Security Assistant</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -290,7 +383,7 @@ if api_key_input:
     st.session_state["ai_api_key"] = api_key_input
 
 if not st.session_state["ai_api_key"]:
-    st.sidebar.caption("🔑 Enter your Anthropic API key above to enable the AI assistant.")
+    st.sidebar.caption("🔑 Enter your Groq API key above to enable the AI assistant.")
 else:
     st.sidebar.caption("✅ API key set — assistant is active.")
 
@@ -319,8 +412,8 @@ else:
         label_visibility="collapsed",
     )
 
-    col_send, col_clear = st.sidebar.columns([2, 1])
-    send_btn  = col_send.button("💬 Ask",   use_container_width=True)
+    col_send, col_clear = st.sidebar.columns([1, 1])
+    send_btn  = col_send.button("💬 Ask",    use_container_width=True)
     clear_btn = col_clear.button("🗑️ Clear", use_container_width=True)
 
     if send_btn and user_input.strip():
@@ -356,68 +449,53 @@ else:
 
 if menu == "Home":
 
-    # Optional background image
-    try:
-        bin_str = get_base64("homepage.png")
-        st.markdown(f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{bin_str}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }}
-        </style>""", unsafe_allow_html=True)
-    except FileNotFoundError:
-        pass
-
     st.markdown("""
-    <div style='padding: 40px 0 10px 0;'>
-      <h1 style='font-size:2.6rem; font-family:Share Tech Mono; color:#58a6ff !important;'>
-        🛡️ AI-Based Cyber Attack Detection
-      </h1>
-      <p style='font-size:18px; color:#8da4bf; max-width:650px;'>
-        Real-time network traffic analysis powered by machine learning.
-        Detect DDoS, Port Scan, and Web Attacks before they cause damage.
+    <div style='background:rgba(0,100,255,0.06); border:1px solid rgba(0,120,255,0.15);
+                border-radius:14px; padding:36px; text-align:center; margin-bottom:28px;'>
+      <div style='font-size:48px; margin-bottom:14px;'>🛡️</div>
+      <div style='font-family:Orbitron,monospace; font-size:22px; font-weight:900;
+           background:linear-gradient(90deg,#4da6ff,#0066ff);
+           -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+           margin-bottom:10px;'>AI CYBER DEFENSE SYSTEM</div>
+      <p style='font-size:14px; color:rgba(255,255,255,0.4); max-width:500px;
+         margin:0 auto; line-height:1.7;'>
+        Real-time network traffic classification powered by machine learning.<br>
+        Detect DDoS, PortScan, and Web Attacks before they cause damage.
       </p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
-
     col1, col2, col3 = st.columns(3)
     cards = [
-        ("🔍", "Manual Prediction", "Enter individual traffic features and get an instant threat verdict."),
-        ("📊", "Analysis",          "Upload a CSV, run batch predictions, and explore visualisations — all in one place."),
-        ("📋", "Prediction Log",    "Review all predictions made in the current session."),
+        ("🔍", "Manual Prediction", "Enter individual traffic features and get an instant threat verdict with confidence score."),
+        ("📊", "Analysis",          "Upload a CSV, run batch predictions, and explore full analytics — all in one place."),
+        ("📋", "Prediction Log",    "Review all predictions made in the current session with colour-coded results."),
     ]
     for col, (icon, title, desc) in zip([col1, col2, col3], cards):
         col.markdown(f"""
-        <div style='
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(56,139,253,0.2);
-            border-radius: 12px;
-            padding: 22px 18px;
-            text-align: center;
-            height: 100%;
-        '>
-          <div style='font-size:32px; margin-bottom:8px;'>{icon}</div>
-          <div style='font-weight:700; font-size:15px; color:#58a6ff; margin-bottom:6px;'>{title}</div>
-          <div style='font-size:13px; color:#8da4bf; line-height:1.5;'>{desc}</div>
+        <div style='background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+                    border-radius:12px; padding:22px 18px; text-align:center; height:100%;
+                    transition: border-color 0.15s;'>
+          <div style='font-size:28px; margin-bottom:10px;'>{icon}</div>
+          <div style='font-family:Orbitron,monospace; font-weight:700; font-size:12px;
+               color:#4da6ff; margin-bottom:8px; letter-spacing:0.5px;'>{title.upper()}</div>
+          <div style='font-size:12px; color:rgba(255,255,255,0.35); line-height:1.6;'>{desc}</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown("""
-    <div style='background:rgba(21,101,192,0.12); border:1px solid rgba(21,101,192,0.3);
+    <div style='background:rgba(0,80,200,0.08); border:1px solid rgba(0,120,255,0.2);
                 border-radius:10px; padding:18px 22px;'>
-      <b style='color:#58a6ff;'>ℹ️ How it works</b><br>
-      <span style='color:#8da4bf; font-size:14px;'>
-        The model was trained on the <b style='color:#cdd9e5;'>CICIDS 2017</b> dataset using 11 key network flow features.
-        It classifies traffic into <b style='color:#4caf50;'>Normal</b>,
-        <b style='color:#f44336;'>DDoS</b>,
-        <b style='color:#ff9800;'>PortScan</b>, or
-        <b style='color:#9c27b0;'>Web Attack</b>.
+      <div style='font-family:Orbitron,monospace; font-size:11px; color:#4da6ff;
+           letter-spacing:1px; margin-bottom:8px;'>ℹ️ HOW IT WORKS</div>
+      <span style='color:rgba(255,255,255,0.45); font-size:13px; line-height:1.7;'>
+        The model was trained on the <b style='color:#e2e8f0;'>CICIDS 2017</b> dataset using 11 key network flow features.
+        It classifies traffic into
+        <b style='color:#4da6ff;'>Normal</b>,
+        <b style='color:#ff4d6d;'>DDoS</b>,
+        <b style='color:#ffaa00;'>PortScan</b>, or
+        <b style='color:#a855f7;'>Web Attack</b>.
       </span>
     </div>
     """, unsafe_allow_html=True)
@@ -429,34 +507,58 @@ if menu == "Home":
 
 elif menu == "Manual Prediction":
 
-    st.title("🔍 Manual Traffic Prediction")
-    st.markdown("<p style='color:#8da4bf;'>Enter network flow features to classify a single traffic record.</p>",
-                unsafe_allow_html=True)
+    st.markdown("""
+    <div style='margin-bottom:8px;'>
+      <div style='font-family:Orbitron,monospace; font-size:18px; font-weight:700; color:#fff;'>
+        Manual Prediction
+      </div>
+      <div style='font-size:12px; color:rgba(255,255,255,0.35); margin-top:4px;'>
+        Enter network flow features to classify a single traffic record
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
 
     if not model_loaded:
         st.error("Model not loaded. Please ensure IDS_Model.pkl is in the working directory.")
         st.stop()
 
+    # ── Clear reset flag ──
+    INPUT_KEYS = [
+        "bwd_packet_std", "psh_flag", "min_seg", "min_packet_len",
+        "ack_flag", "urg_flag", "init_win", "bwd_packets",
+        "flow_iat", "fwd_iat", "bwd_iat"
+    ]
+    if st.session_state.get("_clear_inputs"):
+        for k in INPUT_KEYS:
+            st.session_state[k] = 0.0
+        st.session_state["_clear_inputs"] = False
+
     col1, col2 = st.columns(2)
 
     with col1:
-        bwd_packet_std = st.number_input("Bwd Packet Length Std",    min_value=0.0, format="%.4f")
-        min_seg        = st.number_input("Min Segment Size Forward", min_value=0.0, format="%.4f")
-        ack_flag       = st.number_input("ACK Flag Count",           min_value=0.0, format="%.4f")
-        init_win       = st.number_input("Init Window Bytes Forward",min_value=0.0, format="%.4f")
-        flow_iat       = st.number_input("Flow IAT Max",             min_value=0.0, format="%.4f")
-        bwd_iat        = st.number_input("Bwd IAT Total",            min_value=0.0, format="%.4f")
+        bwd_packet_std = st.number_input("Bwd Packet Length Std",    min_value=0.0, format="%.4f", key="bwd_packet_std")
+        min_seg        = st.number_input("Min Segment Size Forward", min_value=0.0, format="%.4f", key="min_seg")
+        ack_flag       = st.number_input("ACK Flag Count",           min_value=0.0, format="%.4f", key="ack_flag")
+        init_win       = st.number_input("Init Window Bytes Forward",min_value=0.0, format="%.4f", key="init_win")
+        flow_iat       = st.number_input("Flow IAT Max",             min_value=0.0, format="%.4f", key="flow_iat")
+        bwd_iat        = st.number_input("Bwd IAT Total",            min_value=0.0, format="%.4f", key="bwd_iat")
 
     with col2:
-        psh_flag       = st.number_input("PSH Flag Count",           min_value=0.0, format="%.4f")
-        min_packet_len = st.number_input("Min Packet Length",        min_value=0.0, format="%.4f")
-        urg_flag       = st.number_input("URG Flag Count",           min_value=0.0, format="%.4f")
-        bwd_packets    = st.number_input("Bwd Packets/s",            min_value=0.0, format="%.4f")
-        fwd_iat        = st.number_input("Fwd IAT Std",              min_value=0.0, format="%.4f")
+        psh_flag       = st.number_input("PSH Flag Count",           min_value=0.0, format="%.4f", key="psh_flag")
+        min_packet_len = st.number_input("Min Packet Length",        min_value=0.0, format="%.4f", key="min_packet_len")
+        urg_flag       = st.number_input("URG Flag Count",           min_value=0.0, format="%.4f", key="urg_flag")
+        bwd_packets    = st.number_input("Bwd Packets/s",            min_value=0.0, format="%.4f", key="bwd_packets")
+        fwd_iat        = st.number_input("Fwd IAT Std",              min_value=0.0, format="%.4f", key="fwd_iat")
 
     st.markdown("")
-    predict_btn = st.button("🔮 Predict Traffic", use_container_width=True)
+    btn_col1, btn_col2 = st.columns([1, 1])
+    predict_btn = btn_col1.button("🔮 Predict Traffic", use_container_width=True)
+    clear_btn   = btn_col2.button("🗑️ Clear Values",   use_container_width=True)
+
+    if clear_btn:
+        st.session_state["_clear_inputs"] = True
+        st.rerun()
 
     if predict_btn:
 
@@ -472,20 +574,25 @@ elif menu == "Manual Prediction":
 
         st.markdown("---")
 
-        # Result card
+        result_colors = {
+            "Normal":     ("#4da6ff", "rgba(0,120,255,0.08)",  "rgba(0,120,255,0.3)"),
+            "DDoS":       ("#ff4d6d", "rgba(255,77,109,0.08)", "rgba(255,77,109,0.3)"),
+            "PortScan":   ("#ffaa00", "rgba(255,170,0,0.08)",  "rgba(255,170,0,0.3)"),
+            "Web Attack": ("#a855f7", "rgba(168,85,247,0.08)", "rgba(168,85,247,0.3)"),
+            "Unknown":    ("#8da4bf", "rgba(141,164,191,0.08)","rgba(141,164,191,0.3)"),
+        }
+        rc = result_colors.get(label, result_colors["Unknown"])
+
         st.markdown(f"""
-        <div style="
-            background:{bg_color};
-            padding: 22px 28px;
-            border-radius: 12px;
-            border-left: 8px solid {border_color};
-            font-size: 22px;
-            font-weight: 700;
-            color: {border_color};
-            margin-bottom: 12px;
-        ">
-            {icon} {label.upper()}
-            <div style="font-size:14px; font-weight:400; color:#555; margin-top:6px;">{desc}</div>
+        <div style="background:{rc[1]}; padding:20px 24px; border-radius:12px;
+                    border:1px solid {rc[2]}; margin-bottom:12px; display:flex;
+                    align-items:center; gap:16px;">
+          <div style="font-size:28px;">{icon}</div>
+          <div>
+            <div style="font-family:Orbitron,monospace; font-size:15px; font-weight:700;
+                 color:{rc[0]}; letter-spacing:1px;">{label.upper()}</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px;">{desc}</div>
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -495,21 +602,18 @@ elif menu == "Manual Prediction":
             prob       = model.predict_proba(input_data)
             confidence = float(np.max(prob)) * 100
 
-            # Confidence gauge bar
-            gauge_color = "#4caf50" if label == "Normal" else "#f44336"
+            gauge_color = "#4da6ff" if label == "Normal" else rc[0]
             st.markdown(f"""
-            <div style="margin-top:10px;">
-              <div style="font-size:13px; color:#8da4bf; margin-bottom:4px;">
-                Confidence Score: <b style="color:#e0e6f0;">{confidence:.2f}%</b>
+            <div style="margin-top:10px; background:rgba(255,255,255,0.03);
+                 border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-size:12px; color:rgba(255,255,255,0.35);">Confidence Score</span>
+                <span style="font-family:Orbitron,monospace; font-size:13px; color:{gauge_color};
+                     font-weight:700;">{confidence:.2f}%</span>
               </div>
-              <div style="background:#1e3a5f; border-radius:99px; height:14px; width:100%;">
-                <div style="
-                  width:{confidence:.1f}%;
-                  background: linear-gradient(90deg, {gauge_color}, {gauge_color}aa);
-                  height:14px;
-                  border-radius:99px;
-                  transition: width 1s ease;
-                "></div>
+              <div style="background:rgba(255,255,255,0.08); border-radius:99px; height:6px;">
+                <div style="width:{confidence:.1f}%; background:linear-gradient(90deg,{gauge_color},{gauge_color}99);
+                     height:6px; border-radius:99px;"></div>
               </div>
             </div>
             """, unsafe_allow_html=True)
@@ -539,9 +643,14 @@ elif menu == "Manual Prediction":
 
 elif menu == "Analysis":
 
-    st.title("📊 Dataset Analysis")
-    st.markdown("<p style='color:#8da4bf;'>Upload a CSV of network traffic, run batch predictions, and explore full analytics — all in one place.</p>",
-                unsafe_allow_html=True)
+    st.markdown("""
+    <div style='margin-bottom:8px;'>
+      <div style='font-family:Orbitron,monospace; font-size:18px; font-weight:700; color:#fff;'>Analysis</div>
+      <div style='font-size:12px; color:rgba(255,255,255,0.35); margin-top:4px;'>
+        Upload dataset · Run predictions · Explore analytics
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
 
     if not model_loaded:
@@ -727,9 +836,14 @@ elif menu == "Analysis":
 
 elif menu == "Prediction Log":
 
-    st.title("📋 Prediction Log")
-    st.markdown("<p style='color:#8da4bf;'>All manual predictions made in this session.</p>",
-                unsafe_allow_html=True)
+    st.markdown("""
+    <div style='margin-bottom:8px;'>
+      <div style='font-family:Orbitron,monospace; font-size:18px; font-weight:700; color:#fff;'>Prediction Log</div>
+      <div style='font-size:12px; color:rgba(255,255,255,0.35); margin-top:4px;'>
+        Session history of all manual predictions
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
 
     log = st.session_state.get("prediction_log", [])
